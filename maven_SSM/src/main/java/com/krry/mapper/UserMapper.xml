@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 在mybatis相应的xml文件配置mybatis的sql文件和mapper转换器(也就是说的mapper下面的接口) 
+	   注入到sqlSessionFactory(放入到内存中)-->
+
+<!-- 这里的命名空间可以随便定义(必须唯一)，但是为了方便，定义成mapper包下的类的目录，
+	   调用mapper下面类的接口方法的时候，调用的路径是:mapper包下的类的目录+方法名，
+	   即是与这个命名空间+id一样，自动用了这个sql语句(id对应这个类的接口里面的方法)
+	   这里面必定有executeQuery方法，会执行这条sql语句 -->
+
+<!-- 如果自己自定义名命名空间，调用下面的sql语句的方法为：
+	   在mapper里的方法执行以下语句：
+	 SqlSession session = sessionFactory.openSession();
+	 List<User> users = session.selectList("命名空间+id");//根据实际结果集类型和sql语句类型写这条代码
+	   就可以获取结果集 -->
+<mapper namespace="com.krry.mapper.UserMapper" >
+	<!-- 所有的增删查改都在这里定义sql语句 -->
+	
+	<!-- 查询所有的用户信息 -->
+	<select id="findUsers" resultType="User">
+		SELECT id,username,password FROM krry_user_test
+	</select>
+	
+	<!-- 登录时根据输入的昵称或账号查找用户 -->
+	<select id="getLogin" resultType="User" >
+		SELECT
+			id,
+			username,
+			password,
+			email,
+			create_time as createTime
+		FROM
+			krry_user_test
+		WHERE
+			email = #{name} or username = #{name}
+	</select>
+	
+	<!-- 若已存在用户信息，再查询密码是否正确 -->
+	<select id="getpass" resultType="User" >
+		SELECT
+			id,
+			username,
+			password,
+			email,
+			create_time as createTime
+		FROM
+			krry_user_test
+		WHERE
+			(email = #{name} or username = #{name}) AND password = #{password}
+	</select>
+	
+	<!-- 注册时根据输入的昵称查找用户 -->
+	<select id="getothernameres" resultType="User" >
+		SELECT
+			id,
+			username,
+			password,
+			email,
+			create_time as createTime
+		FROM
+			krry_user_test
+		WHERE
+			username = #{name}
+	</select>
+	
+	<!-- 注册时根据输入的账号查找用户 -->
+	<select id="getemailres" resultType="User" >
+		SELECT
+			id,
+			username,
+			password,
+			email,
+			create_time as createTime
+		FROM
+			krry_user_test
+		WHERE
+			email = #{email}
+	</select>
+	
+	<!-- 注册用户信息 -->
+	<insert id="saveUser" parameterType="User">
+		INSERT INTO krry_user_test(
+			id,
+			username,
+			email,
+			password,
+			create_time
+		)VALUES(
+			#{id},
+			#{username},
+			#{email},
+			#{password},
+			#{createTime}
+		)
+	</insert>
+	
+	
+</mapper>

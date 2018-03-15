@@ -1,0 +1,7 @@
+
+
+controller --> service --> mapper
+
+controller:作为请求转发，调用service接口处理逻辑
+service:接口，处理业务逻辑（impl里面实现，调用mapper操作数据库）
+mapper:操作数据库的接口

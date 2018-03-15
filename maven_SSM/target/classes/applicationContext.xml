@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   
+  http://www.springframework.org/schema/beans/spring-beans.xsd  
+  http://www.springframework.org/schema/aop   
+  http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+  http://www.springframework.org/schema/tx   
+  http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+  http://www.springframework.org/schema/context   
+  http://www.springframework.org/schema/context/spring-context-3.0.xsd
+  http://www.springframework.org/schema/util   
+  http://www.springframework.org/schema/util/spring-util-3.0.xsd
+  ">
+	
+	
+	<!-- 配置包扫描 -->
+	<context:component-scan base-package="com.krry"></context:component-scan>
+		
+	<!-- 导入外部资源文件 -->
+	<!-- <context:property-placeholder location="classpath:jdbc.properties" />  -->
+	<bean class="com.krry.core.des.EncryptPropertyPlaceholderConfigurer"
+		p:location="classpath:jdbc.properties" p:fileEncoding="utf-8" />
+		
+	<!-- proxool连接池 -->
+	<bean id="dataSource" class="org.logicalcobwebs.proxool.ProxoolDataSource">
+		<!-- 驱动的名字，mysql -->
+		<property name="driver" value="${db.driver}"></property>
+		<!--proxool 的 url连接串，这个必须确定用户名和密码 -->
+		<property name="driverUrl" value="${db.url}"></property>
+		<!-- 用户名(proxool没有使用，但是不能没有) -->
+		<property name="user" value="${db.username}"></property>
+        <!-- 密码(proxool没有使用，但是不能没有) -->
+		<property name="password" value="${db.password}"></property>
+		<!-- proxool自动侦察各个连接状态的时间间隔(毫秒),侦察到空闲的连接就马上回收,超时的销毁 现在设置为4秒） -->
+		<property name="houseKeepingSleepTime" value="3000"></property><!-- 自动检查连接是否断掉开关 -->
+		<property name="testBeforeUse" value="true"></property>
+		<!--  如果发现了空闲的数据库连接.house keeper 将会用这个语句来测试.这个语句最好非常快的被执行.如果没有定义,测试过程将会被忽略 -->
+		<property name="houseKeepingTestSql" value="SELECT count(1) from dual"></property>
+		<!--  如果housekeeper 检测到某个线程的活动时间大于这个数值.它将会杀掉这个线程.所以确认一下你的服务器的带宽.然后定一个合适的值.默认是5分钟. 现在设置 10 秒--> 
+		<property name="maximumActiveTime" value="10000"></property>
+		<!-- 最少保持的空闲连接数 （现在设置20个） -->
+		<property name="prototypeCount" value="20"></property>
+		<!-- 最大连接数 （现在设置100个） -->
+		<property name="maximumConnectionCount" value="200"></property>
+		<!-- 最小连接数 （现在设置50个） -->
+		<property name="minimumConnectionCount" value="50"></property>
+		<!-- 如果为true,那么每个被执行的SQL语句将会在执行期被log记录(DEBUG LEVEL).你也可以注册一个ConnectionListener (参看ProxoolFacade)得到这些信息. -->
+		<property name="trace" value="false"></property>
+		<property name="verbose" value="true"></property>
+	</bean>
+	
+	<!-- 注册事务管理器 -->
+	<bean id="txMgr"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<!-- 开启事务注解驱动 -->
+	<tx:annotation-driven transaction-manager="txMgr" />
+	
+	<!-- 配置mybatis的sqlSessionFactory -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation" value="classpath:mybatis-config.xml"></property>
+	</bean>
+	
+	<!-- 配置可以整体扫描Mapper的一个扫描器 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!--如果有多个报路径,用逗号分开即可  -->
+		<property name="basePackage" value="com.krry.mapper"></property>
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"></property>
+	</bean>
+	
+</beans>
